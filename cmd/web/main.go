@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 const (
@@ -11,16 +13,25 @@ const (
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet", showSnippet)
-	mux.HandleFunc("/snippet/create", createSnippet)
+	addr := flag.String("addr", ":4040", "Address of the server")
+	flag.Parse()
 
-	fileServer := http.FileServer(http.Dir(staticFolder))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	infoLog := log.New(os.Stdout, "[INFO]\t", log.LstdFlags)
+	errorLog := log.New(os.Stderr, "[ERROR]\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	err := http.ListenAndServe(":4040", mux)
+	app := application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
+	server := http.Server{
+		Addr:     *addr,
+		ErrorLog: app.errorLog,
+		Handler:  app.routes(),
+	}
+
+	err := server.ListenAndServe()
 	if err != nil {
-		log.Fatal(err)
+		errorLog.Println(err)
 	}
 }
