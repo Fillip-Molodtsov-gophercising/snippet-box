@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"github.com/Fillip-Molodtsov-gophercising/snippet-box/pkg/repository"
 	"log"
 	"net/http"
 	"runtime/debug"
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
+	errorLog    *log.Logger
+	infoLog     *log.Logger
+	snippetRepo repository.SnippetGetterUpdater
 }
 
 // The serverError helper writes an error message and stack trace to the errorLog,
